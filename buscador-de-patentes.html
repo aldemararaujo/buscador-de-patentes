@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buscador de Patentes — EPO Open Patent Service</title>
+
+<style>
+/* Buscador de Patentes — design system herdado do UI Kit "Industry/Blueprint".
+   Fontes trocadas por pilha de sistema (sem @font-face/CDN) para manter o app
+   100% offline e de arquivo único. */
+
+:root {
+  --color-bg: #f2f2f3;
+  --color-surface: #e9e9ea;
+  --color-surface-raised: #fbfbfc;
+  --color-text: #1d1f20;
+  --color-text-muted: color-mix(in srgb, #1d1f20 60%, transparent);
+  --color-accent: #5980a6;
+  --color-divider: color-mix(in srgb, #1d1f20 16%, transparent);
+
+  --color-neutral-100: #f5f5f8;
+  --color-neutral-200: #e7e7ea;
+  --color-neutral-300: #d4d4d7;
+  --color-neutral-400: #b7b7ba;
+  --color-neutral-500: #98989b;
+  --color-neutral-600: #7a7a7d;
+  --color-neutral-700: #5d5d60;
+  --color-neutral-800: #424244;
+  --color-neutral-900: #2b2b2d;
+
+  --color-accent-100: #eef6ff;
+  --color-accent-200: #d6ebff;
+  --color-accent-300: #b5d9fd;
+  --color-accent-400: #94bce3;
+  --color-accent-500: #749dc4;
+  --color-accent-600: #597ea3;
+  --color-accent-700: #416180;
+  --color-accent-800: #2c455d;
+  --color-accent-900: #1d2d3d;
+
+  --color-success: oklch(56% 0.1 152);
+  --color-success-bg: oklch(94% 0.03 152);
+  --color-success-text: oklch(34% 0.08 152);
+
+  --color-warning: oklch(66% 0.12 75);
+  --color-warning-bg: oklch(94% 0.04 75);
+  --color-warning-text: oklch(38% 0.09 65);
+
+  --color-danger: oklch(54% 0.12 25);
+  --color-danger-bg: oklch(94% 0.03 25);
+  --color-danger-text: oklch(38% 0.11 25);
+
+  --color-neutral-status: oklch(55% 0.01 250);
+  --color-neutral-status-bg: oklch(93% 0.003 250);
+  --color-neutral-status-text: oklch(38% 0.01 250);
+
+  --shadow-sm: 0 1px 2px color-mix(in srgb, #2b2b2d 14%, transparent);
+  --shadow-md: 0 3px 10px color-mix(in srgb, #2b2b2d 16%, transparent);
+  --shadow-lg: 0 12px 32px color-mix(in srgb, #2b2b2d 22%, transparent);
+
+  --font-heading: "Segoe UI Semibold", "Segoe UI", system-ui, -apple-system, "Arial Narrow", sans-serif;
+  --font-heading-weight: 600;
+  --font-body: "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: "Cascadia Mono", "Consolas", "SFMono-Regular", ui-monospace, monospace;
+
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 20px;
+  --space-6: 24px; --space-8: 32px; --space-10: 40px; --space-12: 48px; --space-16: 64px;
+
+  --radius-sm: 2px; --radius-md: 4px; --radius-lg: 8px;
+  --container-max: 1180px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; font-family: var(--font-body); font-weight: 400; font-size: 15px; line-height: 1.55; color: var(--color-text); background: var(--color-bg); }
+h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); font-weight: var(--font-heading-weight); line-height: 1.15; letter-spacing: -0.01em; margin: 0 0 var(--space-2); }
+h1 { font-size: 40px; } h2 { font-size: 28px; } h3 { font-size: 22px; } h4 { font-size: 19px; } h5 { font-size: 16px; }
+h6 { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
+p { margin: 0 0 var(--space-3); }
+a { color: var(--color-accent-700); text-underline-offset: 3px; }
+a:hover { color: var(--color-accent-800); }
+:focus { outline: none; }
+:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.text-muted { color: var(--color-text-muted); }
+.eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-accent-700); }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; cursor: pointer; text-decoration: none; white-space: nowrap;
+  font-family: var(--font-heading); font-weight: var(--font-heading-weight); font-size: 14px; letter-spacing: 0.01em; color: var(--color-text);
+  background: transparent; border: 1px solid var(--color-divider); padding: 9px 16px; border-radius: var(--radius-md);
+  transition: background .12s ease, color .12s ease, border-color .12s ease; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-primary { background: var(--color-accent); color: #fff; border-color: var(--color-accent); }
+.btn-primary:hover { background: var(--color-accent-600); border-color: var(--color-accent-600); }
+.btn-secondary:hover { background: color-mix(in srgb, var(--color-text) 6%, transparent); }
+.btn-ghost { border-color: transparent; color: var(--color-accent-700); padding-inline: 10px; }
+.btn-ghost:hover { background: color-mix(in srgb, var(--color-accent) 10%, transparent); }
+.btn-icon { width: 38px; height: 38px; padding: 0; flex: none; }
+.btn-block { width: 100%; }
+.btn-sm { padding: 6px 12px; font-size: 12.5px; }
+.btn-danger { color: var(--color-danger-text); border-color: color-mix(in srgb, var(--color-danger) 40%, var(--color-divider)); }
+.btn-danger:hover { background: var(--color-danger-bg); }
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field > label { font-size: 12.5px; font-weight: 500; color: var(--color-text-muted); }
+.input { width: 100%; min-height: 40px; padding: 8px 12px; font: inherit; font-size: 14.5px; color: var(--color-text);
+  background: var(--color-surface-raised); border: 1px solid var(--color-divider); border-radius: var(--radius-md); appearance: none; }
+.input:hover { border-color: color-mix(in srgb, var(--color-text) 45%, transparent); }
+.input:focus-visible { border-color: var(--color-accent); outline-offset: 0; }
+
+.searchbar { display: flex; align-items: center; gap: var(--space-2); background: var(--color-surface-raised);
+  border: 1px solid var(--color-divider); border-radius: var(--radius-md); padding: 4px 4px 4px 14px; }
+.searchbar input { flex: 1; border: 0; background: transparent; outline: none; font: inherit; font-size: 15.5px; color: var(--color-text); min-width: 0; }
+.searchbar svg { color: var(--color-text-muted); flex: none; }
+
+.checkbox { display: inline-flex; align-items: center; gap: 9px; cursor: pointer; font-size: 14px; }
+.checkbox input { position: absolute; opacity: 0; width: 0; height: 0; }
+.checkbox .box { width: 17px; height: 17px; flex: none; border: 1.5px solid var(--color-divider); border-radius: 3px; position: relative; }
+.checkbox input:checked + .box { background: var(--color-accent); border-color: var(--color-accent); }
+.checkbox input:checked + .box::after { content: ""; position: absolute; left: 4px; top: 1px; width: 5px; height: 9px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(40deg); }
+
+.tag { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 500; letter-spacing: 0.01em; padding: 3px 9px; border-radius: 3px; white-space: nowrap; }
+.tag-neutral { background: var(--color-neutral-100); color: var(--color-neutral-800); }
+.tag-outline { border: 1px solid var(--color-divider); color: var(--color-text-muted); }
+.tag-accent { background: var(--color-accent-100); color: var(--color-accent-800); }
+
+.source-badge { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 10.5px; font-weight: 500;
+  letter-spacing: 0.03em; padding: 3px 8px; border: 1px solid var(--color-divider); border-radius: 3px; color: var(--color-text-muted); background: var(--color-surface-raised); }
+
+.card { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-4); background: transparent; border: 1px solid var(--color-divider); position: relative; }
+.card-kicker { font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-accent-700); font-weight: 600; }
+.card-title { font-family: var(--font-heading); font-weight: var(--font-heading-weight); font-size: 19px; line-height: 1.25; }
+.card-body { margin: 0; font-size: 13.5px; color: var(--color-text-muted); flex: 1; }
+.card-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 11.5px; color: var(--color-text-muted); }
+.elev-sm { box-shadow: var(--shadow-sm); }
+.card:hover { border-color: color-mix(in srgb, var(--color-accent) 55%, var(--color-divider)); }
+
+.blueprint > .corner { position: absolute; width: 11px; height: 11px; color: color-mix(in srgb, var(--color-text) 55%, transparent); }
+.blueprint > .corner::before, .blueprint > .corner::after { content: ""; position: absolute; background: currentColor; }
+.blueprint > .corner::before { left: 5px; top: 0; width: 1px; height: 100%; }
+.blueprint > .corner::after { top: 5px; left: 0; width: 100%; height: 1px; }
+.blueprint > .corner.tl { top: -6px; left: -6px; } .blueprint > .corner.tr { top: -6px; right: -6px; }
+.blueprint > .corner.bl { bottom: -6px; left: -6px; } .blueprint > .corner.br { bottom: -6px; right: -6px; }
+
+.patent-result { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-4); border: 1px solid var(--color-divider); cursor: pointer; transition: border-color .12s ease, background .12s ease; }
+.patent-result:hover { border-color: var(--color-accent); background: color-mix(in srgb, var(--color-accent) 4%, transparent); }
+.patent-result .pr-top { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
+.patent-result .pr-title { font-family: var(--font-heading); font-weight: 600; font-size: 17.5px; line-height: 1.28; }
+.patent-result .pr-num { font-family: var(--font-mono); font-size: 12px; color: var(--color-text-muted); }
+.patent-result .pr-snippet { font-size: 13.5px; color: var(--color-text-muted); line-height: 1.5; }
+.patent-result .pr-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+
+.nav { display: flex; align-items: center; gap: var(--space-4); padding: 12px var(--space-6); border-bottom: 1px solid var(--color-divider); background: var(--color-surface-raised); }
+.nav-brand { display: flex; align-items: center; gap: 9px; font-family: var(--font-heading); font-weight: 700; font-size: 18px; margin-right: var(--space-4); color: var(--color-text); text-decoration: none; }
+.nav-brand .mark { width: 26px; height: 26px; border: 1.5px solid var(--color-accent); display: grid; place-items: center; color: var(--color-accent); flex: none; font-size: 11px; font-weight: 700; }
+.nav-links { display: flex; align-items: center; gap: var(--space-5); flex: 1; }
+.nav-links a { color: var(--color-text-muted); text-decoration: none; font-size: 14px; font-weight: 500; padding: 6px 2px; border-bottom: 2px solid transparent; cursor: pointer; }
+.nav-links a:hover { color: var(--color-text); }
+.nav-links a[aria-current='page'] { color: var(--color-text); border-color: var(--color-accent); }
+.nav-actions { display: flex; align-items: center; gap: var(--space-2); }
+
+.table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.table th { text-align: left; font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; color: var(--color-text-muted); padding: var(--space-3) var(--space-2); border-bottom: 1px solid var(--color-divider); }
+.table td { padding: var(--space-3) var(--space-2); border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent); vertical-align: middle; }
+.table tbody tr:hover { background: color-mix(in srgb, var(--color-text) 3.5%, transparent); }
+
+.pagination { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; justify-content: center; }
+.pagination button { min-width: 34px; height: 34px; padding: 0 6px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid transparent; background: transparent; border-radius: var(--radius-md); font-family: var(--font-mono); font-size: 13px; color: var(--color-text-muted); cursor: pointer; }
+.pagination button:hover:not(:disabled) { background: color-mix(in srgb, var(--color-text) 6%, transparent); }
+.pagination button:disabled { opacity: .35; cursor: default; }
+.pagination button[aria-current='page'] { background: var(--color-accent); color: #fff; }
+
+.tabs { display: flex; gap: var(--space-5); border-bottom: 1px solid var(--color-divider); }
+.tabs button { background: none; border: none; font: inherit; font-size: 14px; font-weight: 500; color: var(--color-text-muted); padding: var(--space-3) 2px; border-bottom: 2px solid transparent; cursor: pointer; margin-bottom: -1px; }
+.tabs button:hover { color: var(--color-text); }
+.tabs button[aria-selected='true'] { color: var(--color-text); border-color: var(--color-accent); }
+
+.dialog-backdrop { position: fixed; inset: 0; display: none; place-items: center; padding: var(--space-4); background: color-mix(in srgb, var(--color-neutral-900) 55%, transparent); backdrop-filter: blur(2px); z-index: 50; }
+.dialog-backdrop.open { display: grid; }
+.dialog { width: min(520px, 100%); max-height: 88vh; overflow-y: auto; display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-5); border-radius: var(--radius-lg); background: var(--color-surface-raised); box-shadow: var(--shadow-lg); }
+.dialog-title { font-family: var(--font-heading); font-weight: 600; font-size: 20px; }
+.dialog-body { font-size: 13.5px; color: var(--color-text-muted); }
+.dialog-actions { display: flex; justify-content: flex-end; gap: var(--space-2); margin-top: var(--space-2); }
+
+.alert { display: flex; gap: var(--space-3); align-items: flex-start; padding: var(--space-3) var(--space-4); border: 1px solid var(--color-divider); border-left: 3px solid var(--color-accent); background: var(--color-surface-raised); border-radius: var(--radius-md); }
+.alert-title { font-weight: 600; font-size: 14px; }
+.alert-body { font-size: 13px; color: var(--color-text-muted); }
+.alert-danger { border-left-color: var(--color-danger); }
+.alert-danger .alert-title { color: var(--color-danger-text); }
+
+.empty-state { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); padding: var(--space-12) var(--space-6); text-align: center; color: var(--color-text-muted); }
+.empty-state svg { width: 40px; height: 40px; opacity: 0.5; }
+
+.hr { height: 1px; border: 0; margin: var(--space-4) 0; background: var(--color-divider); }
+.container { max-width: var(--container-max); margin: 0 auto; padding: 0 var(--space-6); }
+
+.grid-ground { background-image: linear-gradient(color-mix(in srgb, var(--color-accent) 8%, transparent) 1px, transparent 1px),
+  linear-gradient(90deg, color-mix(in srgb, var(--color-accent) 8%, transparent) 1px, transparent 1px); background-size: 32px 32px; }
+
+.screen { display: none; }
+.screen.active { display: block; }
+.spinner { width: 15px; height: 15px; border: 2px solid color-mix(in srgb, #fff 35%, transparent); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; }
+.spinner-dark { border-color: color-mix(in srgb, var(--color-accent) 30%, transparent); border-top-color: var(--color-accent); }
+@keyframes spin { to { transform: rotate(360deg); } }
+details.tech summary { cursor: pointer; font-size: 12.5px; color: var(--color-text-muted); }
+details.tech pre { white-space: pre-wrap; word-break: break-all; font-size: 11.5px; background: var(--color-neutral-100); border: 1px solid var(--color-divider); border-radius: var(--radius-md); padding: var(--space-3); max-height: 240px; overflow: auto; }
+.gear-btn { font-size: 17px; line-height: 1; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ NAV ============ -->
+  <div class="nav container" style="border-left:none;border-right:none">
+    <a class="nav-brand" data-act="nav" data-screen="busca"><span class="mark">BP</span>Buscador de Patentes</a>
+    <div class="nav-links">
+      <a data-act="nav" data-screen="busca" data-nav="busca">Buscar</a>
+      <a data-act="nav" data-screen="resultados" data-nav="resultados">Resultados</a>
+      <a data-act="nav" data-screen="salvos" data-nav="salvos">Salvos</a>
+    </div>
+    <div class="nav-actions">
+      <span class="text-muted mono" id="config-status" style="font-size:11.5px"></span>
+      <button class="btn btn-secondary btn-icon gear-btn" data-act="open-config" title="Configurar chave da API (EPO OPS)">&#9881;</button>
+    </div>
+  </div>
+
+  <!-- ============ 1. BUSCA (home) ============ -->
+  <section class="screen active" id="screen-busca">
+    <div class="grid-ground" style="padding:64px 24px 40px">
+      <div class="container" style="max-width:720px;text-align:center;margin:0 auto;display:flex;flex-direction:column;gap:20px;align-items:center">
+        <span class="eyebrow">Escritório Europeu de Patentes (EPO) &middot; Open Patent Service</span>
+        <h1 style="font-size:42px;max-width:620px">Busque patentes reais, com dados oficiais.</h1>
+        <p class="text-muted" style="font-size:15.5px;max-width:520px">Digite palavras livres — o app consulta ao vivo a base bibliográfica da EPO, que cobre mais de 90 escritórios nacionais, incluindo o INPI (Brasil), USPTO e WIPO/PCT.</p>
+        <form id="search-form-home" style="width:100%;max-width:640px;display:flex;flex-direction:column;gap:10px" data-act="search-form">
+          <div class="searchbar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:19px;height:19px"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.3" y2="16.3"/></svg>
+            <input id="q-home" placeholder='Ex: "purificação de água por membrana" ou biossensor de glicose'>
+            <button class="btn btn-primary" type="submit" id="btn-search-home">Buscar</button>
+          </div>
+          <label class="checkbox" style="align-self:center;font-size:13px" title="Restringe a resultados cuja publicação seja no Brasil (campo pn=BR*)">
+            <input type="checkbox" id="scope-br-home"><span class="box"></span>Somente publicações no Brasil (INPI)
+          </label>
+        </form>
+      </div>
+    </div>
+
+    <div class="container" style="padding:8px 24px 56px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+      <div class="card blueprint"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <div class="card-kicker">Fonte</div><div class="card-title">EPO OPS</div><div class="card-body">dados bibliográficos oficiais do Escritório Europeu de Patentes, via API pública</div></div>
+      <div class="card blueprint"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <div class="card-kicker">Cobertura</div><div class="card-title">90+ escritórios</div><div class="card-body">inclui INPI (Brasil), USPTO, WIPO/PCT e demais escritórios nacionais indexados pela EPO</div></div>
+      <div class="card blueprint"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <div class="card-kicker">Classificação</div><div class="card-title">CPC / IPC</div><div class="card-body">código de classificação técnica exibido quando disponível na resposta da API</div></div>
+    </div>
+
+    <div class="container" style="padding-bottom:56px" id="home-config-warning"></div>
+  </section>
+
+  <!-- ============ 2. RESULTADOS ============ -->
+  <section class="screen" id="screen-resultados">
+    <div class="container" style="padding:24px 24px 0">
+      <form data-act="search-form" style="display:flex;flex-direction:column;gap:8px;margin-bottom:18px">
+        <div class="searchbar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:19px;height:19px"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.3" y2="16.3"/></svg>
+          <input id="q-results" placeholder="Buscar patentes...">
+          <button class="btn btn-primary" type="submit" id="btn-search-results">Buscar</button>
+        </div>
+        <label class="checkbox" style="font-size:12.5px">
+          <input type="checkbox" id="scope-br-results"><span class="box"></span>Somente publicações no Brasil (INPI)
+        </label>
+      </form>
+    </div>
+
+    <div class="container" style="padding:0 24px 48px" id="results-area">
+      <div class="empty-state">
+        <p>Faça uma busca para ver resultados reais vindos da EPO Open Patent Service.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 3. DETALHE ============ -->
+  <section class="screen" id="screen-detalhe">
+    <div class="container" style="padding:24px 24px 48px" id="detalhe-area"></div>
+  </section>
+
+  <!-- ============ 4. SALVOS ============ -->
+  <section class="screen" id="screen-salvos">
+    <div class="container" style="padding:24px 24px 48px;display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <h2 style="margin:0">Patentes salvas</h2>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-secondary btn-sm" data-act="export-saved">Exportar (.json)</button>
+          <label class="btn btn-secondary btn-sm" style="cursor:pointer">Importar (.json)<input type="file" id="import-saved-input" accept="application/json" style="display:none"></label>
+        </div>
+      </div>
+      <div id="saved-area"></div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ============ MODAL: CONFIGURAÇÃO DA API ============ -->
+<div class="dialog-backdrop" id="config-dialog">
+  <div class="dialog">
+    <div class="dialog-title">Configurar acesso à EPO Open Patent Service</div>
+    <div class="dialog-body">
+      Este app busca patentes reais usando a API gratuita da EPO (Escritório Europeu de Patentes). Para usar, você precisa
+      criar sua própria conta gratuita e gerar uma chave (Consumer Key/Secret). Sua chave fica <strong>só no seu navegador</strong>
+      (armazenada em localStorage) — nunca é enviada a nenhum servidor além da própria EPO.
+      <br><br>
+      1. Acesse <a href="https://developers.epo.org" target="_blank" rel="noopener">developers.epo.org</a> e crie uma conta gratuita.<br>
+      2. Crie um "app" no painel — ele gera automaticamente um <strong>Consumer Key</strong> e um <strong>Consumer Secret</strong>.<br>
+      3. Cole os dois abaixo.
+    </div>
+    <div class="field"><label>Consumer Key</label><input class="input mono" id="cfg-key" placeholder="sua consumer key"></div>
+    <div class="field"><label>Consumer Secret</label><input class="input mono" id="cfg-secret" type="password" placeholder="seu consumer secret"></div>
+    <div class="dialog-actions">
+      <button class="btn btn-ghost" data-act="clear-config">Remover chave salva</button>
+      <button class="btn btn-secondary" data-act="close-config">Cancelar</button>
+      <button class="btn btn-primary" data-act="save-config">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  // ============ constantes e estado ============
+  var STORAGE_CONFIG = 'bp_epo_config';
+  var STORAGE_SAVED = 'bp_saved_patents';
+  var PAGE_SIZE = 25;
+  var OPS_BASE = 'https://ops.epo.org/3.2';
+
+  var state = {
+    query: '',
+    brOnly: false,
+    start: 1,
+    total: 0,
+    items: [],       // resultados da última busca (para abrir detalhe sem re-buscar)
+    loading: false
+  };
+
+  var tokenCache = null; // { access_token, expires_at } — só em memória, nunca salvo
+
+  // ============ localStorage helpers ============
+  function loadConfig(){
+    try { return JSON.parse(localStorage.getItem(STORAGE_CONFIG) || 'null') || {key:'', secret:''}; }
+    catch(e){ return {key:'', secret:''}; }
+  }
+  function saveConfig(key, secret){
+    localStorage.setItem(STORAGE_CONFIG, JSON.stringify({key: key, secret: secret}));
+  }
+  function clearConfig(){
+    localStorage.removeItem(STORAGE_CONFIG);
+    tokenCache = null;
+  }
+  function loadSaved(){
+    try { return JSON.parse(localStorage.getItem(STORAGE_SAVED) || '[]'); }
+    catch(e){ return []; }
+  }
+  function persistSaved(list){
+    localStorage.setItem(STORAGE_SAVED, JSON.stringify(list));
+  }
+  function savedKey(item){ return (item.country||'')+'.'+(item.docNumber||'')+'.'+(item.kind||''); }
+  function isSaved(item){
+    var list = loadSaved();
+    var k = savedKey(item);
+    return list.some(function(x){ return savedKey(x) === k; });
+  }
+  function toggleSaved(item){
+    var list = loadSaved();
+    var k = savedKey(item);
+    var idx = list.findIndex(function(x){ return savedKey(x) === k; });
+    if(idx >= 0){ list.splice(idx,1); }
+    else {
+      list.unshift({
+        country: item.country, docNumber: item.docNumber, kind: item.kind,
+        title: item.title, applicant: item.applicant, date: item.date,
+        savedAt: new Date().toISOString()
+      });
+    }
+    persistSaved(list);
+    return idx < 0; // true se acabou de salvar
+  }
+
+  // ============ utilidades ============
+  function escapeHtml(str){
+    if(str === null || str === undefined) return '';
+    return String(str).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+  function toBase64(str){
+    try { return btoa(unescape(encodeURIComponent(str))); }
+    catch(e){ return btoa(str); }
+  }
+  function formatDate(yyyymmdd){
+    if(!yyyymmdd || yyyymmdd.length !== 8) return 'não informado';
+    var y = yyyymmdd.slice(0,4), m = yyyymmdd.slice(4,6), d = yyyymmdd.slice(6,8);
+    if(y === '0000' || m === '00' || d === '00') return 'não informado';
+    return d + '/' + m + '/' + y;
+  }
+  function collapseWs(str){
+    return (str || '').replace(/\s+/g, ' ').trim();
+  }
+  function espacenetUrl(country, docNumber, kind){
+    if(!country || !docNumber) return null;
+    var url = 'https://worldwide.espacenet.com/publicationDetails/biblio?CC=' + encodeURIComponent(country) +
+      '&NR=' + encodeURIComponent(docNumber) + (kind ? '&KC=' + encodeURIComponent(kind) : '') + '&FT=D';
+    return url;
+  }
+
+  // ============ erros tipados ============
+  function ConfigError(message){ this.name = 'ConfigError'; this.message = message || 'Chave da API não configurada.'; }
+  ConfigError.prototype = Object.create(Error.prototype);
+
+  function ApiError(stage, status, body){
+    this.name = 'ApiError';
+    this.stage = stage;
+    this.status = status;
+    this.body = body;
+    this.message = 'Erro na API OPS (' + stage + '): HTTP ' + status;
+  }
+  ApiError.prototype = Object.create(Error.prototype);
+
+  // ============ autenticação OAuth2 (client_credentials) ============
+  function getToken(){
+    var cfg = loadConfig();
+    if(!cfg.key || !cfg.secret){
+      return Promise.reject(new ConfigError());
+    }
+    if(tokenCache && Date.now() < tokenCache.expires_at - 5000){
+      return Promise.resolve(tokenCache.access_token);
+    }
+    var authHeader = 'Basic ' + toBase64(cfg.key + ':' + cfg.secret);
+    return fetch(OPS_BASE + '/auth/accesstoken', {
+      method: 'POST',
+      headers: {
+        'Authorization': authHeader,
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: 'grant_type=client_credentials'
+    }).then(function(resp){
+      return resp.text().then(function(text){
+        if(!resp.ok){ throw new ApiError('autenticação', resp.status, text); }
+        var data;
+        try { data = JSON.parse(text); }
+        catch(e){ throw new ApiError('autenticação (resposta inválida)', resp.status, text); }
+        var expiresInSec = parseInt(data.expires_in || '1200', 10) || 1200;
+        tokenCache = { access_token: data.access_token, expires_at: Date.now() + expiresInSec * 1000 };
+        return tokenCache.access_token;
+      });
+    });
+  }
+
+  // ============ busca ============
+  function buildCql(query, brOnly){
+    var clean = (query || '').replace(/"/g, '').trim();
+    var cql = 'txt="' + clean + '"';
+    if(brOnly){ cql += ' and pn=BR*'; }
+    return cql;
+  }
+
+  function doSearch(query, brOnly, start){
+    return getToken().then(function(token){
+      var cql = buildCql(query, brOnly);
+      var url = OPS_BASE + '/rest-services/published-data/search/biblio?q=' + encodeURIComponent(cql);
+      var end = start + PAGE_SIZE - 1;
+      return fetch(url, {
+        headers: {
+          'Authorization': 'Bearer ' + token,
+          'Range': start + '-' + end
+        }
+      }).then(function(resp){
+        return resp.text().then(function(text){
+          if(resp.status === 404){ return { total: 0, items: [] }; }
+          if(!resp.ok){ throw new ApiError('busca', resp.status, text); }
+          return parseSearchXml(text);
+        });
+      });
+    });
+  }
+
+  function nsGet(root, tag){
+    var els = root.getElementsByTagNameNS('*', tag);
+    return els.length ? els[0] : null;
+  }
+  function nsGetAll(root, tag){
+    return Array.prototype.slice.call(root.getElementsByTagNameNS('*', tag));
+  }
+  function textOf(el){
+    return el ? collapseWs(el.textContent) : '';
+  }
+
+  function parseSearchXml(xmlText){
+    var xml;
+    try {
+      xml = new DOMParser().parseFromString(xmlText, 'text/xml');
+      if(xml.getElementsByTagName('parsererror').length){ throw new Error('parsererror'); }
+    } catch(e){
+      throw new ApiError('busca (XML inválido)', 200, xmlText);
+    }
+
+    var searchNode = nsGet(xml, 'biblio-search');
+    var total = 0;
+    if(searchNode){
+      var attr = searchNode.getAttribute('total-result-count');
+      total = attr ? parseInt(attr, 10) : 0;
+      if(isNaN(total)) total = 0;
+    }
+
+    var docs = nsGetAll(xml, 'exchange-document');
+    var items = docs.map(function(doc){
+      return parseExchangeDocument(doc);
+    });
+
+    return { total: total, items: items };
+  }
+
+  function parseExchangeDocument(doc){
+    var item = {
+      country: doc.getAttribute('country') || '',
+      docNumber: doc.getAttribute('doc-number') || '',
+      kind: doc.getAttribute('kind') || '',
+      title: 'não informado',
+      date: '',
+      applicant: 'não informado',
+      classification: '',
+      snippet: ''
+    };
+
+    var bibData = nsGet(doc, 'bibliographic-data');
+    if(!bibData){ return item; }
+
+    // título — prefere inglês, senão o primeiro disponível
+    var titles = nsGetAll(bibData, 'invention-title');
+    if(titles.length){
+      var enTitle = titles.find(function(t){ return (t.getAttribute('lang')||'').toLowerCase() === 'en'; });
+      item.title = textOf(enTitle || titles[0]) || 'não informado';
+    }
+
+    // data de publicação (a partir do publication-reference, se disponível)
+    var pubRef = nsGet(bibData, 'publication-reference');
+    if(pubRef){
+      var docIds = nsGetAll(pubRef, 'document-id');
+      var docdbId = docIds.find(function(d){ return d.getAttribute('document-id-type') === 'docdb'; }) || docIds[0];
+      if(docdbId){
+        var dateEl = nsGet(docdbId, 'date');
+        if(dateEl) item.date = formatDate(textOf(dateEl));
+        // fallback dos identificadores, caso os atributos do exchange-document venham vazios
+        if(!item.country){ var c = nsGet(docdbId,'country'); if(c) item.country = textOf(c); }
+        if(!item.docNumber){ var dn = nsGet(docdbId,'doc-number'); if(dn) item.docNumber = textOf(dn); }
+        if(!item.kind){ var k = nsGet(docdbId,'kind'); if(k) item.kind = textOf(k); }
+      }
+    }
+    if(!item.date){ item.date = 'não informado'; }
+
+    // titular/aplicante
+    var applicants = nsGet(bibData, 'applicants');
+    if(applicants){
+      var names = nsGetAll(applicants, 'applicant-name').map(function(a){
+        var n = nsGet(a, 'name');
+        return textOf(n);
+      }).filter(Boolean);
+      if(names.length){
+        item.applicant = names.slice(0,2).join('; ') + (names.length > 2 ? ' (+' + (names.length-2) + ')' : '');
+      }
+    }
+
+    // classificação — prefere IPCR, senão CPC/patent-classification.
+    // O texto bruto da OPS vem em formato de largura fixa (ex: "C02F   1/44        20060101AFI...");
+    // extraímos apenas a seção+classe+subclasse e o grupo/subgrupo reais, sem inventar nada — se o
+    // padrão não bater, mostramos o texto bruto (colapsado) em vez de arriscar um corte errado.
+    function extractClassCode(raw){
+      var collapsed = collapseWs(raw);
+      var m = collapsed.match(/^([A-HY]\d{2}[A-Z])\s+(\d{1,4}\/\d{2,6})/);
+      return m ? (m[1] + ' ' + m[2]) : collapsed;
+    }
+    var ipcr = nsGet(bibData, 'classifications-ipcr');
+    if(ipcr){
+      var ipcrText = nsGet(ipcr, 'text');
+      item.classification = extractClassCode(textOf(ipcrText));
+    }
+    if(!item.classification){
+      var pClass = nsGet(bibData, 'patent-classifications');
+      if(pClass){
+        var symbol = nsGet(pClass, 'classification-symbol');
+        item.classification = extractClassCode(textOf(symbol));
+      }
+    }
+
+    // resumo curto, se vier junto (nem sempre presente no /search/biblio)
+    var abs = nsGet(doc, 'abstract');
+    if(abs){
+      var p = nsGet(abs, 'p');
+      item.snippet = textOf(p || abs);
+    }
+
+    return item;
+  }
+
+  // ============ detalhe (abstract + família) ============
+  function fetchDetail(country, docNumber, kind){
+    var id = country + '.' + docNumber + '.' + kind;
+    return getToken().then(function(token){
+      var url = OPS_BASE + '/rest-services/published-data/publication/docdb/' + encodeURIComponent(id) + '/biblio,abstract';
+      return fetch(url, { headers: { 'Authorization': 'Bearer ' + token } }).then(function(resp){
+        return resp.text().then(function(text){
+          if(!resp.ok){ throw new ApiError('detalhe', resp.status, text); }
+          return parseDetailXml(text);
+        });
+      });
+    });
+  }
+
+  function parseDetailXml(xmlText){
+    var xml;
+    try {
+      xml = new DOMParser().parseFromString(xmlText, 'text/xml');
+      if(xml.getElementsByTagName('parsererror').length){ throw new Error('parsererror'); }
+    } catch(e){
+      throw new ApiError('detalhe (XML inválido)', 200, xmlText);
+    }
+    var result = { abstractText: '', abstractLang: '' };
+    var abstracts = nsGetAll(xml, 'abstract');
+    if(abstracts.length){
+      var enAbs = abstracts.find(function(a){ return (a.getAttribute('lang')||'').toLowerCase() === 'en'; });
+      var chosen = enAbs || abstracts[0];
+      var paragraphs = nsGetAll(chosen, 'p').map(textOf).filter(Boolean);
+      result.abstractText = paragraphs.length ? paragraphs.join(' ') : textOf(chosen);
+      result.abstractLang = chosen.getAttribute('lang') || '';
+    }
+    return result;
+  }
+
+  function fetchFamily(country, docNumber, kind){
+    var id = country + '.' + docNumber + '.' + kind;
+    return getToken().then(function(token){
+      var url = OPS_BASE + '/rest-services/published-data/publication/docdb/' + encodeURIComponent(id) + '/family/biblio';
+      return fetch(url, { headers: { 'Authorization': 'Bearer ' + token } }).then(function(resp){
+        return resp.text().then(function(text){
+          if(!resp.ok){ throw new ApiError('família de patentes', resp.status, text); }
+          return parseFamilyXml(text);
+        });
+      });
+    });
+  }
+
+  function parseFamilyXml(xmlText){
+    var xml;
+    try {
+      xml = new DOMParser().parseFromString(xmlText, 'text/xml');
+      if(xml.getElementsByTagName('parsererror').length){ throw new Error('parsererror'); }
+    } catch(e){
+      throw new ApiError('família (XML inválido)', 200, xmlText);
+    }
+    var members = nsGetAll(xml, 'family-member');
+    return members.map(function(m){
+      var docIds = nsGetAll(m, 'document-id');
+      var docdbId = docIds.find(function(d){ return d.getAttribute('document-id-type') === 'docdb'; }) || docIds[0];
+      if(!docdbId) return null;
+      var country = textOf(nsGet(docdbId, 'country'));
+      var docNumber = textOf(nsGet(docdbId, 'doc-number'));
+      var kind = textOf(nsGet(docdbId, 'kind'));
+      var dateEl = nsGet(docdbId, 'date');
+      return {
+        country: country || 'não informado',
+        docNumber: docNumber || 'não informado',
+        kind: kind || '',
+        date: dateEl ? formatDate(textOf(dateEl)) : 'não informado'
+      };
+    }).filter(Boolean);
+  }
+
+  // ============ navegação entre telas ============
+  var screens = ['busca','resultados','detalhe','salvos'];
+  function go(name){
+    screens.forEach(function(s){
+      var el = document.getElementById('screen-' + s);
+      if(el) el.classList.toggle('active', s === name);
+    });
+    document.querySelectorAll('[data-nav]').forEach(function(a){ a.removeAttribute('aria-current'); });
+    var navMap = { resultados: 'resultados', busca: 'busca', salvos: 'salvos', detalhe: 'resultados' };
+    var link = document.querySelector('[data-nav="' + (navMap[name] || 'busca') + '"]');
+    if(link) link.setAttribute('aria-current', 'page');
+    if(name === 'salvos') renderSaved();
+    window.scrollTo({ top: 0 });
+  }
+
+  // ============ renderização: status de config ============
+  function refreshConfigStatus(){
+    var cfg = loadConfig();
+    var el = document.getElementById('config-status');
+    var warnEl = document.getElementById('home-config-warning');
+    if(cfg.key && cfg.secret){
+      el.textContent = 'chave configurada';
+      warnEl.innerHTML = '';
+    } else {
+      el.textContent = 'sem chave';
+      warnEl.innerHTML =
+        '<div class="alert" style="max-width:640px;margin:0 auto"><div>' +
+        '<div class="alert-title">Configure sua chave gratuita da EPO para buscar</div>' +
+        '<div class="alert-body">Este app não vem com nenhuma chave embutida. Clique em ' +
+        '<button class="btn btn-ghost btn-sm" style="padding:2px 6px" data-act="open-config">&#9881; Configurar</button> ' +
+        'e cole sua Consumer Key/Secret gratuita de developers.epo.org.</div>' +
+        '</div></div>';
+    }
+  }
+
+  // ============ renderização: resultados ============
+  function renderLoadingResults(){
+    var area = document.getElementById('results-area');
+    area.innerHTML = '<div class="empty-state"><div class="spinner spinner-dark" style="width:26px;height:26px;border-width:3px"></div><p>Buscando na EPO Open Patent Service...</p></div>';
+  }
+
+  function renderErrorResults(err){
+    var area = document.getElementById('results-area');
+    if(err instanceof ConfigError){
+      area.innerHTML =
+        '<div class="alert alert-danger"><div>' +
+        '<div class="alert-title">Chave da API não configurada</div>' +
+        '<div class="alert-body">Clique em <button class="btn btn-ghost btn-sm" style="padding:2px 6px" data-act="open-config">&#9881; Configurar</button> e cole sua chave gratuita da EPO (developers.epo.org) antes de buscar.</div>' +
+        '</div></div>';
+      return;
+    }
+    var status = err.status !== undefined ? err.status : '—';
+    var body = err.body !== undefined ? err.body : '';
+    var hint = '';
+    if(status === 403) hint = 'HTTP 403 normalmente indica cota excedida ou chave inválida.';
+    else if(status === 400) hint = 'HTTP 400 normalmente indica erro de sintaxe na consulta.';
+    area.innerHTML =
+      '<div class="alert alert-danger"><div>' +
+      '<div class="alert-title">Não foi possível buscar</div>' +
+      '<div class="alert-body">' + escapeHtml(err.message || String(err)) + (hint ? ' — ' + hint : '') + '</div>' +
+      '<details class="tech" style="margin-top:8px"><summary>Detalhes técnicos</summary>' +
+      '<div class="mono text-muted" style="font-size:11.5px;margin:6px 0">Status HTTP: ' + escapeHtml(status) + '</div>' +
+      '<pre>' + escapeHtml(String(body).slice(0, 2000)) + '</pre>' +
+      '</details>' +
+      '</div></div>';
+  }
+
+  function renderResults(){
+    var area = document.getElementById('results-area');
+    if(!state.query){
+      area.innerHTML = '<div class="empty-state"><p>Faça uma busca para ver resultados reais vindos da EPO Open Patent Service.</p></div>';
+      return;
+    }
+    if(!state.items.length){
+      area.innerHTML = '<div class="empty-state"><p>Nenhum resultado encontrado para <strong>&ldquo;' + escapeHtml(state.query) + '&rdquo;</strong>.</p></div>';
+      return;
+    }
+
+    var html = '<div class="text-muted" style="font-size:13.5px;margin-bottom:14px">' +
+      state.total.toLocaleString('pt-BR') + ' resultado(s) para <strong style="color:var(--color-text)">&ldquo;' + escapeHtml(state.query) + '&rdquo;</strong></div>';
+    html += '<div style="display:flex;flex-direction:column;gap:12px">';
+
+    state.items.forEach(function(item, idx){
+      var saved = isSaved(item);
+      html += '<div class="patent-result" data-act="open-detail" data-idx="' + idx + '">' +
+        '<div class="pr-top">' +
+          '<div><div class="pr-title">' + escapeHtml(item.title) + '</div>' +
+          '<div class="pr-num mono">' + escapeHtml(item.country + ' ' + item.docNumber + (item.kind ? ' ' + item.kind : '')) + ' &middot; publicado ' + escapeHtml(item.date) + '</div></div>' +
+          '<button class="btn btn-secondary btn-sm" data-act="toggle-save" data-idx="' + idx + '" title="Salvar">' + (saved ? '&#9733; Salvo' : '&#9734; Salvar') + '</button>' +
+        '</div>' +
+        (item.snippet ? '<div class="pr-snippet">' + escapeHtml(item.snippet) + '</div>' : '') +
+        '<div class="pr-foot"><span class="source-badge">EPO/Espacenet</span>' +
+        (item.classification ? '<span class="tag tag-outline">' + escapeHtml(item.classification) + '</span>' : '') +
+        '<span class="tag tag-neutral">' + escapeHtml(item.applicant) + '</span></div>' +
+      '</div>';
+    });
+    html += '</div>';
+    html += '<div style="display:flex;justify-content:center;padding:20px 0 8px" id="pagination-holder"></div>';
+
+    area.innerHTML = html;
+    renderPagination();
+  }
+
+  function renderPagination(){
+    var holder = document.getElementById('pagination-holder');
+    if(!holder) return;
+    var currentPage = Math.floor((state.start - 1) / PAGE_SIZE) + 1;
+    var totalPages = Math.max(1, Math.ceil(state.total / PAGE_SIZE));
+    if(totalPages <= 1){ holder.innerHTML = ''; return; }
+
+    var pages = [];
+    var addPage = function(p){ if(pages.indexOf(p) === -1 && p >= 1 && p <= totalPages) pages.push(p); };
+    addPage(1); addPage(totalPages);
+    for(var p = currentPage - 1; p <= currentPage + 1; p++) addPage(p);
+    pages.sort(function(a,b){ return a-b; });
+
+    var html = '<div class="pagination">';
+    html += '<button data-act="paginate" data-page="' + (currentPage-1) + '" ' + (currentPage<=1?'disabled':'') + '>&lsaquo;</button>';
+    var prev = null;
+    pages.forEach(function(p){
+      if(prev !== null && p - prev > 1){ html += '<button disabled>&hellip;</button>'; }
+      html += '<button data-act="paginate" data-page="' + p + '" ' + (p===currentPage?'aria-current="page"':'') + '>' + p + '</button>';
+      prev = p;
+    });
+    html += '<button data-act="paginate" data-page="' + (currentPage+1) + '" ' + (currentPage>=totalPages?'disabled':'') + '>&rsaquo;</button>';
+    html += '</div>';
+    holder.innerHTML = html;
+  }
+
+  function runSearch(query, brOnly, start){
+    state.query = query;
+    state.brOnly = brOnly;
+    state.start = start || 1;
+    go('resultados');
+    document.getElementById('q-results').value = query;
+    document.getElementById('scope-br-results').checked = !!brOnly;
+    renderLoadingResults();
+    doSearch(query, brOnly, state.start).then(function(res){
+      state.total = res.total;
+      state.items = res.items;
+      renderResults();
+    }).catch(function(err){
+      state.total = 0;
+      state.items = [];
+      renderErrorResults(err);
+    });
+  }
+
+  // ============ renderização: detalhe ============
+  function openDetail(idx){
+    var item = state.items[idx];
+    if(!item) return;
+    go('detalhe');
+    renderDetailSkeleton(item);
+    var espUrl = espacenetUrl(item.country, item.docNumber, item.kind);
+
+    Promise.allSettled ? Promise.allSettled([
+      fetchDetail(item.country, item.docNumber, item.kind),
+      fetchFamily(item.country, item.docNumber, item.kind)
+    ]).then(function(results){
+      var detailResult = results[0], familyResult = results[1];
+      var abstractHtml, familyHtml;
+
+      if(detailResult.status === 'fulfilled'){
+        var d = detailResult.value;
+        abstractHtml = d.abstractText
+          ? '<p>' + escapeHtml(d.abstractText) + '</p>' + (d.abstractLang ? '<div class="text-muted" style="font-size:12px">idioma do resumo: ' + escapeHtml(d.abstractLang) + '</div>' : '')
+          : '<p class="text-muted">Resumo não informado pela API para este documento.</p>';
+      } else {
+        abstractHtml = renderInlineError(detailResult.reason, 'resumo');
+      }
+
+      if(familyResult.status === 'fulfilled'){
+        var fam = familyResult.value;
+        familyHtml = fam.length ? renderFamilyTable(fam) : '<p class="text-muted">Nenhum membro de família informado pela API.</p>';
+      } else {
+        familyHtml = renderInlineError(familyResult.reason, 'família de patentes');
+      }
+
+      document.getElementById('tabpanel-resumo').innerHTML = abstractHtml;
+      document.getElementById('tabpanel-familia').innerHTML = familyHtml;
+    }) : null;
+  }
+
+  function renderInlineError(err, label){
+    if(err instanceof ConfigError){
+      return '<div class="alert alert-danger"><div><div class="alert-title">Chave não configurada</div><div class="alert-body">Configure a chave da EPO para carregar ' + escapeHtml(label) + '.</div></div></div>';
+    }
+    var status = err && err.status !== undefined ? err.status : '—';
+    var body = err && err.body !== undefined ? err.body : '';
+    return '<div class="alert alert-danger"><div>' +
+      '<div class="alert-title">Não foi possível carregar ' + escapeHtml(label) + '</div>' +
+      '<div class="alert-body">' + escapeHtml((err && err.message) || String(err)) + '</div>' +
+      '<details class="tech" style="margin-top:8px"><summary>Detalhes técnicos</summary>' +
+      '<div class="mono text-muted" style="font-size:11.5px;margin:6px 0">Status HTTP: ' + escapeHtml(status) + '</div>' +
+      '<pre>' + escapeHtml(String(body).slice(0, 2000)) + '</pre></details>' +
+      '</div></div>';
+  }
+
+  function renderFamilyTable(fam){
+    var html = '<table class="table"><thead><tr><th>País</th><th>Número</th><th>Data de publicação</th></tr></thead><tbody>';
+    fam.forEach(function(m){
+      html += '<tr><td>' + escapeHtml(m.country) + '</td><td class="mono">' + escapeHtml(m.country + ' ' + m.docNumber + ' ' + m.kind) + '</td><td class="mono">' + escapeHtml(m.date) + '</td></tr>';
+    });
+    html += '</tbody></table>';
+    return html;
+  }
+
+  function renderDetailSkeleton(item){
+    var area = document.getElementById('detalhe-area');
+    var saved = isSaved(item);
+    var espUrl = espacenetUrl(item.country, item.docNumber, item.kind);
+
+    var html = '<button class="btn btn-ghost btn-sm" style="margin-bottom:14px" data-act="nav" data-screen="resultados">&lsaquo; Voltar aos resultados</button>';
+    html += '<div style="display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap">';
+    html += '<div style="flex:1;min-width:320px;display:flex;flex-direction:column;gap:16px">';
+    html += '<div><h2 style="margin-bottom:6px">' + escapeHtml(item.title) + '</h2>' +
+      '<div class="mono text-muted" style="font-size:13px">' + escapeHtml(item.country + ' ' + item.docNumber + ' ' + item.kind) + ' &middot; publicado ' + escapeHtml(item.date) + '</div></div>';
+    html += '<div class="pr-foot"><span class="source-badge">EPO/Espacenet</span>' +
+      (item.classification ? '<span class="tag tag-outline">' + escapeHtml(item.classification) + '</span>' : '') +
+      '<span class="tag tag-neutral">' + escapeHtml(item.applicant) + '</span></div>';
+
+    html += '<div class="tabs" id="detail-tabs">' +
+      '<button aria-selected="true" data-tab="resumo">Resumo</button>' +
+      '<button data-tab="familia">Família de patentes</button>' +
+      '</div>';
+    html += '<div data-tabpanel="resumo" id="tabpanel-resumo"><div class="spinner spinner-dark" style="width:20px;height:20px;border-width:3px"></div></div>';
+    html += '<div data-tabpanel="familia" id="tabpanel-familia" style="display:none"><div class="spinner spinner-dark" style="width:20px;height:20px;border-width:3px"></div></div>';
+    html += '<p class="text-muted" style="font-size:12.5px">Reivindicações e citações completas não estão disponíveis nesta versão do app — consulte o documento integral no Espacenet (link ao lado).</p>';
+    html += '</div>';
+
+    html += '<aside style="width:240px;flex:none;display:flex;flex-direction:column;gap:12px">';
+    html += '<button class="btn btn-primary btn-block" data-act="toggle-save-detail">' + (saved ? '&#9733; Salvo — remover' : '&#9734; Salvar') + '</button>';
+    if(espUrl){
+      html += '<a class="btn btn-secondary btn-block" href="' + escapeHtml(espUrl) + '" target="_blank" rel="noopener">Ver no Espacenet &#8599;</a>';
+    }
+    html += '</aside>';
+    html += '</div>';
+
+    area.innerHTML = html;
+    area.dataset.currentItem = JSON.stringify(item);
+
+    document.getElementById('detail-tabs').addEventListener('click', function(e){
+      var btn = e.target.closest('button');
+      if(!btn) return;
+      document.querySelectorAll('#detail-tabs button').forEach(function(b){ b.setAttribute('aria-selected', b === btn ? 'true' : 'false'); });
+      document.querySelectorAll('[data-tabpanel]').forEach(function(p){ p.style.display = p.dataset.tabpanel === btn.dataset.tab ? '' : 'none'; });
+    });
+  }
+
+  // ============ renderização: salvos ============
+  function renderSaved(){
+    var area = document.getElementById('saved-area');
+    var list = loadSaved();
+    if(!list.length){
+      area.innerHTML = '<div class="empty-state"><p>Nenhuma patente salva ainda. Na tela de resultados ou de detalhe, clique em &ldquo;Salvar&rdquo;.</p></div>';
+      return;
+    }
+    var html = '<div style="display:flex;flex-direction:column;gap:10px">';
+    list.forEach(function(item, idx){
+      var espUrl = espacenetUrl(item.country, item.docNumber, item.kind);
+      html += '<div class="card" style="flex-direction:row;align-items:center;justify-content:space-between;gap:12px">' +
+        '<div style="min-width:0"><div class="card-title" style="font-size:15.5px">' + escapeHtml(item.title || 'não informado') + '</div>' +
+        '<div class="mono text-muted" style="font-size:12px">' + escapeHtml((item.country||'') + ' ' + (item.docNumber||'') + ' ' + (item.kind||'')) + ' &middot; ' + escapeHtml(item.applicant || 'não informado') + '</div></div>' +
+        '<div style="display:flex;gap:8px;flex:none">' +
+        (espUrl ? '<a class="btn btn-secondary btn-sm" href="' + escapeHtml(espUrl) + '" target="_blank" rel="noopener">Espacenet &#8599;</a>' : '') +
+        '<button class="btn btn-ghost btn-sm" data-act="remove-saved" data-key="' + escapeHtml(savedKey(item)) + '">Remover</button>' +
+        '</div></div>';
+    });
+    html += '</div>';
+    area.innerHTML = html;
+  }
+
+  function removeSaved(key){
+    var list = loadSaved().filter(function(x){ return savedKey(x) !== key; });
+    persistSaved(list);
+    renderSaved();
+  }
+
+  // ============ config modal ============
+  function openConfigDialog(){
+    var cfg = loadConfig();
+    document.getElementById('cfg-key').value = cfg.key || '';
+    document.getElementById('cfg-secret').value = cfg.secret || '';
+    document.getElementById('config-dialog').classList.add('open');
+  }
+  function closeConfigDialog(){
+    document.getElementById('config-dialog').classList.remove('open');
+  }
+  function handleSaveConfig(){
+    var key = document.getElementById('cfg-key').value.trim();
+    var secret = document.getElementById('cfg-secret').value.trim();
+    saveConfig(key, secret);
+    tokenCache = null;
+    refreshConfigStatus();
+    closeConfigDialog();
+  }
+  function handleClearConfig(){
+    clearConfig();
+    document.getElementById('cfg-key').value = '';
+    document.getElementById('cfg-secret').value = '';
+    refreshConfigStatus();
+  }
+
+  // ============ exportar/importar salvos ============
+  function exportSaved(){
+    var list = loadSaved();
+    var blob = new Blob([JSON.stringify(list, null, 2)], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'patentes-salvas.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+  function importSavedFile(file){
+    var reader = new FileReader();
+    reader.onload = function(){
+      try {
+        var imported = JSON.parse(reader.result);
+        if(!Array.isArray(imported)) throw new Error('formato inválido');
+        var current = loadSaved();
+        imported.forEach(function(item){
+          if(!current.some(function(x){ return savedKey(x) === savedKey(item); })){
+            current.push(item);
+          }
+        });
+        persistSaved(current);
+        renderSaved();
+      } catch(e){
+        alert('Não foi possível importar este arquivo: ' + e.message);
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // ============ delegação de eventos (nunca onclick inline) ============
+  document.addEventListener('click', function(e){
+    var el = e.target.closest('[data-act]');
+    if(!el) return;
+    var act = el.dataset.act;
+
+    if(act === 'nav'){
+      go(el.dataset.screen);
+      return;
+    }
+    if(act === 'open-config'){ openConfigDialog(); return; }
+    if(act === 'close-config'){ closeConfigDialog(); return; }
+    if(act === 'save-config'){ handleSaveConfig(); return; }
+    if(act === 'clear-config'){ handleClearConfig(); return; }
+
+    if(act === 'open-detail'){
+      openDetail(parseInt(el.dataset.idx, 10));
+      return;
+    }
+    if(act === 'toggle-save'){
+      e.stopPropagation();
+      var item = state.items[parseInt(el.dataset.idx, 10)];
+      if(item){ toggleSaved(item); renderResults(); }
+      return;
+    }
+    if(act === 'toggle-save-detail'){
+      var area = document.getElementById('detalhe-area');
+      var current = JSON.parse(area.dataset.currentItem || 'null');
+      if(current){
+        toggleSaved(current);
+        renderDetailSkeleton(current);
+        openDetail(state.items.findIndex(function(x){ return savedKey(x) === savedKey(current); }));
+      }
+      return;
+    }
+    if(act === 'remove-saved'){
+      removeSaved(el.dataset.key);
+      return;
+    }
+    if(act === 'paginate'){
+      var page = parseInt(el.dataset.page, 10);
+      if(isNaN(page) || page < 1) return;
+      runSearch(state.query, state.brOnly, (page - 1) * PAGE_SIZE + 1);
+      return;
+    }
+    if(act === 'export-saved'){ exportSaved(); return; }
+  });
+
+  // fechar modal clicando fora
+  document.getElementById('config-dialog').addEventListener('click', function(e){
+    if(e.target.id === 'config-dialog') closeConfigDialog();
+  });
+
+  // formulários de busca (home + resultados)
+  document.querySelectorAll('[data-act="search-form"]').forEach(function(form){
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      var qInput = form.querySelector('input[id^="q-"]');
+      var brInput = form.querySelector('input[id^="scope-br-"]');
+      var q = qInput.value.trim();
+      if(!q) return;
+      runSearch(q, brInput ? brInput.checked : false, 1);
+    });
+  });
+
+  // importar arquivo de salvos
+  document.getElementById('import-saved-input').addEventListener('change', function(e){
+    var file = e.target.files[0];
+    if(file) importSavedFile(file);
+    e.target.value = '';
+  });
+
+  // ============ inicialização ============
+  refreshConfigStatus();
+  go('busca');
+})();
+</script>
+</body>
+</html>
