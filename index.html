@@ -230,7 +230,7 @@ details.tech pre { white-space: pre-wrap; word-break: break-all; font-size: 11.5
       <div class="container" style="max-width:720px;text-align:center;margin:0 auto;display:flex;flex-direction:column;gap:20px;align-items:center">
         <span class="eyebrow">Escritório Europeu de Patentes (EPO) &middot; Open Patent Service</span>
         <h1 style="font-size:42px;max-width:620px">Busque patentes reais, com dados oficiais.</h1>
-        <p class="text-muted" style="font-size:15.5px;max-width:520px">Digite palavras livres — o app consulta ao vivo a base bibliográfica da EPO, que cobre mais de 90 escritórios nacionais, incluindo o INPI (Brasil), USPTO e WIPO/PCT.</p>
+        <p class="text-muted" style="font-size:15.5px;max-width:520px">Digite palavras livres em qualquer idioma — o app traduz automaticamente para o inglês e busca nas duas formas, consultando ao vivo a base bibliográfica da EPO, que cobre mais de 90 escritórios nacionais, incluindo o INPI (Brasil), USPTO e WIPO/PCT.</p>
         <form id="search-form-home" style="width:100%;max-width:640px;display:flex;flex-direction:column;gap:10px" data-act="search-form">
           <div class="searchbar">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:19px;height:19px"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.3" y2="16.3"/></svg>
@@ -334,6 +334,7 @@ details.tech pre { white-space: pre-wrap; word-break: break-all; font-size: 11.5
 
   var state = {
     query: '',
+    queryEn: null,   // tradução em inglês do termo buscado (null se já era inglês ou tradução indisponível)
     brOnly: false,
     start: 1,
     total: 0,
@@ -454,23 +455,55 @@ details.tech pre { white-space: pre-wrap; word-break: break-all; font-size: 11.5
     });
   }
 
+  // ============ tradução automática para inglês ============
+  // A base do Espacenet é dominada por títulos/resumos em inglês; buscar só no
+  // idioma digitado deixa a maior parte do acervo de fora. O termo é traduzido
+  // para inglês e a busca cobre os dois: o original E a tradução.
+  var translateCache = {}; // só em memória; evita repetir a chamada na paginação
+  function translateToEnglish(text){
+    var clean = (text || '').replace(/"/g, '').trim();
+    if(Object.prototype.hasOwnProperty.call(translateCache, clean)){
+      return Promise.resolve(translateCache[clean]);
+    }
+    var url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=' + encodeURIComponent(clean);
+    return fetch(url).then(function(resp){
+      if(!resp.ok){ throw new Error('HTTP ' + resp.status); }
+      return resp.json();
+    }).then(function(data){
+      var translated = (data && data[0] ? data[0] : []).map(function(seg){
+        return seg && seg[0] ? seg[0] : '';
+      }).join('').trim();
+      // se a tradução é igual ao original (já estava em inglês), não há o que acrescentar
+      var result = translated && translated.toLowerCase() !== clean.toLowerCase() ? translated : null;
+      translateCache[clean] = result;
+      return result;
+    }).catch(function(){
+      return null; // tradução indisponível nunca impede a busca: segue com o termo original
+    });
+  }
+
   // ============ busca ============
-  function buildCql(query, brOnly){
-    var clean = (query || '').replace(/"/g, '').trim();
-    var cql = 'txt="' + clean + '"';
+  function buildCql(terms, brOnly){
+    var parts = terms.map(function(t){
+      return 'txt="' + (t || '').replace(/"/g, '').trim() + '"';
+    });
+    var cql = parts.length > 1 ? '(' + parts.join(' or ') + ')' : parts[0];
     if(brOnly){ cql += ' and pn=BR*'; }
     return cql;
   }
 
-  function doSearch(query, brOnly, start){
+  function doSearch(terms, brOnly, start){
     return getToken().then(function(token){
-      var cql = buildCql(query, brOnly);
-      var url = OPS_BASE + '/rest-services/published-data/search/biblio?q=' + encodeURIComponent(cql);
+      var cql = buildCql(terms, brOnly);
       var end = start + PAGE_SIZE - 1;
+      // Paginação via query param (Range=): o cabeçalho HTTP "Range" não está na
+      // lista de cabeçalhos que o CORS do OPS permite, e o navegador bloqueia a
+      // chamada inteira ("Failed to fetch") antes de ela sair.
+      var url = OPS_BASE + '/rest-services/published-data/search/biblio?q=' + encodeURIComponent(cql) +
+        '&Range=' + start + '-' + end;
       return fetch(url, {
         headers: {
-          'Authorization': 'Bearer ' + token,
-          'Range': start + '-' + end
+          'Authorization': 'Bearer ' + token
         }
       }).then(function(resp){
         return resp.text().then(function(text){
@@ -747,12 +780,15 @@ details.tech pre { white-space: pre-wrap; word-break: break-all; font-size: 11.5
       return;
     }
     if(!state.items.length){
-      area.innerHTML = '<div class="empty-state"><p>Nenhum resultado encontrado para <strong>&ldquo;' + escapeHtml(state.query) + '&rdquo;</strong>.</p></div>';
+      area.innerHTML = '<div class="empty-state"><p>Nenhum resultado encontrado para <strong>&ldquo;' + escapeHtml(state.query) + '&rdquo;</strong>' +
+        (state.queryEn ? ' (buscado também em inglês: &ldquo;' + escapeHtml(state.queryEn) + '&rdquo;)' : '') + '.</p></div>';
       return;
     }
 
     var html = '<div class="text-muted" style="font-size:13.5px;margin-bottom:14px">' +
-      state.total.toLocaleString('pt-BR') + ' resultado(s) para <strong style="color:var(--color-text)">&ldquo;' + escapeHtml(state.query) + '&rdquo;</strong></div>';
+      state.total.toLocaleString('pt-BR') + ' resultado(s) para <strong style="color:var(--color-text)">&ldquo;' + escapeHtml(state.query) + '&rdquo;</strong>' +
+      (state.queryEn ? ' <span style="display:block;margin-top:3px">buscado também em inglês: <strong style="color:var(--color-text)">&ldquo;' + escapeHtml(state.queryEn) + '&rdquo;</strong></span>' : '') +
+      '</div>';
     html += '<div style="display:flex;flex-direction:column;gap:12px">';
 
     state.items.forEach(function(item, idx){
@@ -810,7 +846,11 @@ details.tech pre { white-space: pre-wrap; word-break: break-all; font-size: 11.5
     document.getElementById('q-results').value = query;
     document.getElementById('scope-br-results').checked = !!brOnly;
     renderLoadingResults();
-    doSearch(query, brOnly, state.start).then(function(res){
+    translateToEnglish(query).then(function(en){
+      state.queryEn = en;
+      var terms = en ? [en, query] : [query];
+      return doSearch(terms, brOnly, state.start);
+    }).then(function(res){
       state.total = res.total;
       state.items = res.items;
       renderResults();

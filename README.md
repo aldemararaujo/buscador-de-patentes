@@ -1,24 +1,41 @@
 # Buscador de Patentes
 
-Aplicativo de página única (HTML/JS puro, sem build, sem dependências externas) para buscar patentes reais por palavra-chave.
+Aplicativo web de busca de patentes conectado à API oficial do **EPO — Open Patent Services (OPS)**, a base do Espacenet. Feito para pesquisadores que precisam fazer uma primeira busca de anterioridade ou explorar o estado da técnica sem depender de software instalado.
 
-## Como usar
+**➡️ Use online: <https://aldemararaujo.github.io/buscador-de-patentes/>**
 
-1. Abra `buscador-de-patentes.html` diretamente no navegador (duplo clique).
-2. Crie uma conta gratuita em [developers.epo.org](https://developers.epo.org) e registre um app para gerar seu **Consumer Key** e **Consumer Secret** do EPO Open Patent Service (OPS).
-3. Clique no ícone de engrenagem (⚙) no app e cole as duas chaves. Elas ficam salvas só no `localStorage` do seu navegador — nunca saem da sua máquina.
-4. Busque por palavras-chave. Os resultados vêm em tempo real da base bibliográfica da EPO (cobertura de mais de 90 escritórios de patentes, incluindo INPI/Brasil, USPTO, WIPO/PCT).
+## O que ele faz
 
-## O que o app faz
+- **Busca em linguagem natural**, em português ou inglês. O termo digitado é traduzido automaticamente para o inglês e a busca cobre os dois idiomas — assim o acervo internacional (majoritariamente em inglês) não fica de fora.
+- **Filtro "somente patentes BR"** para restringir a documentos depositados no Brasil.
+- **Detalhe de cada documento** em abas: dados bibliográficos (título, requerentes, inventores, classificação IPC/CPC, resumo) e **família da patente** (depósitos correspondentes em outros países).
+- **Lista de salvos**: marque documentos de interesse e exporte/importe a lista em JSON para continuar em outro computador.
+- **Link direto para o Espacenet** em cada resultado, para aprofundar a análise.
 
-- Busca por texto livre (título + resumo + reivindicações), com filtro opcional para Brasil/INPI.
-- Lista de resultados com título, número, data, titular, classificação IPC/CPC e link real para o Espacenet.
-- Paginação real.
-- Tela de detalhe com resumo e família de patentes buscados ao vivo.
-- Lista de salvos (localStorage), com exportar/importar em `.json`.
+## Como começar (chave gratuita da EPO)
 
-Nenhum dado é inventado: campos ausentes na resposta da API aparecem como "não informado".
+O app **não vem com nenhuma chave embutida** — cada pessoa usa a sua, gratuita:
+
+1. Crie uma conta em <https://developers.epo.org>.
+2. Crie um "app" no painel — ele gera um **Consumer Key** e um **Consumer Secret**.
+3. No Buscador, clique no botão ⚙ **Configurar** e cole a chave e o segredo.
+
+Pronto: a cota gratuita da EPO é suficiente para uso individual de pesquisa.
+
+## Privacidade
+
+- Sua chave fica salva **apenas no seu navegador** (localStorage). Ela não é enviada para nenhum servidor além da própria EPO, no momento da autenticação.
+- Não há backend próprio, cadastro, cookies de rastreamento nem coleta de dados: o navegador conversa diretamente com a API da EPO.
+
+## Rodando localmente
+
+É um arquivo único e sem dependências: baixe o `index.html` e abra no navegador. Funciona offline, exceto (claro) as chamadas à API da EPO e a tradução automática.
+
+## Limitações conhecidas
+
+- A busca usa o campo `txt` (título, resumo e reivindicações) do OPS; uma busca de anterioridade completa deve combinar outras bases (INPI, WIPO Patentscope, Lens.org) e estratégias por classificação IPC/CPC.
+- A cota gratuita do OPS tem limite de volume; HTTP 403 normalmente indica cota excedida ou chave inválida.
 
 ## Licença
 
-Uso pessoal.
+[MIT](LICENSE) — use, adapte e compartilhe à vontade, mantendo o aviso de copyright.
