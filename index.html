@@ -187,6 +187,11 @@ a:hover { color: var(--color-accent-800); }
 .alert-body { font-size: 13px; color: var(--color-text-muted); }
 .alert-danger { border-left-color: var(--color-danger); }
 .alert-danger .alert-title { color: var(--color-danger-text); }
+.alert-warning { border-left-color: var(--color-warning); background: var(--color-warning-bg); }
+.alert-warning .alert-title { color: var(--color-warning-text); }
+.alert-warning .alert-body { color: var(--color-warning-text); }
+
+.app-footer { border-top: 1px solid var(--color-divider); margin-top: var(--space-8); padding: var(--space-5) var(--space-6); display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6); align-items: center; justify-content: center; text-align: center; font-size: 12.5px; color: var(--color-text-muted); }
 
 .empty-state { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); padding: var(--space-12) var(--space-6); text-align: center; color: var(--color-text-muted); }
 .empty-state svg { width: 40px; height: 40px; opacity: 0.5; }
@@ -221,6 +226,16 @@ details.tech pre { white-space: pre-wrap; word-break: break-all; font-size: 11.5
     <div class="nav-actions">
       <span class="text-muted mono" id="config-status" style="font-size:11.5px"></span>
       <button class="btn btn-secondary btn-icon gear-btn" data-act="open-config" title="Configurar chave da API (EPO OPS)">&#9881;</button>
+    </div>
+  </div>
+
+  <!-- ============ AVISO DE RESPONSABILIDADE ============ -->
+  <div class="container" style="padding:16px 24px 0">
+    <div class="alert alert-warning" role="alert">
+      <div>
+        <div class="alert-title">&#9888;&#65039; Use esta aplicação por sua conta e risco.</div>
+        <div class="alert-body">A aplicação pode produzir resultados errados ou incompletos. Os resultados devem ser comparados com outras fontes antes de serem utilizados.</div>
+      </div>
     </div>
   </div>
 
@@ -296,6 +311,13 @@ details.tech pre { white-space: pre-wrap; word-break: break-all; font-size: 11.5
       <div id="saved-area"></div>
     </div>
   </section>
+
+  <!-- ============ RODAPÉ ============ -->
+  <footer class="app-footer">
+    <span>2026 &copy; Aldemar Araujo Castro</span>
+    <span class="mono">Versão 1.1 &middot; 14/07/2026</span>
+    <span>Esta aplicação é resultado da <strong>Imersão Segundo Cérebro</strong> em Salvador</span>
+  </footer>
 
 </div>
 
